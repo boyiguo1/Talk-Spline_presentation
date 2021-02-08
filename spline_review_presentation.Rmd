@@ -1,0 +1,53 @@
+---
+title: "All You Wanted To Know About Splines"
+author: "Boyi Guo"
+institute: |
+  | Department of Biostatistics
+  | University of Alabama at Birmingham
+date: "Feb 16, 2021"
+output: 
+  beamer_presentation:
+    theme: "Szeged"
+    colortheme: "spruce"
+    toc: FALSE
+    number_section: false
+    slide_level: 2
+bibliography:
+  - bibliography.bib
+nocite: '@*'
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Who I am
+
+
+# Objectives
+* To review basic concepts of splines
+* To raise you awareness of other application of splines
+
+<!-- primarily R user, Hence, less familiar of spline implementation in other softwares -->
+
+# Splines
+* Piece-wise function across the range of possible values
+* 3 components
+  * number & position of knots
+  * Basis functions
+  * order of polynomial terms
+
+## Visual Demonstration
+
+## Natural Cubic Spline
+
+## Application
+
+# Advanced Topics
+## Penalized Spline
+
+## Smooth interactions
+
+# Conclusion
+
+# Q & A
