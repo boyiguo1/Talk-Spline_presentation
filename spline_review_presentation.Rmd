@@ -42,8 +42,8 @@ knitr::opts_chunk$set(echo = TRUE)
 # Overview
 * Spline
 
-  * Explanation
-  * Demonstration & Implementation
+  * Explanation & Demonstration
+  * Implementation
   * Inferences
   
 * Advance Topics
@@ -67,6 +67,8 @@ knitr::opts_chunk$set(echo = TRUE)
 
 > --- @hastie2009elements PP. 139
 
+<!-- For example, the realtionship between age and COVID mortality. -->
+
 ## Previous Solutions:
 
 * Variable categorization: e.g. using quartiles of a continuous variable in a model
@@ -77,7 +79,7 @@ knitr::opts_chunk$set(echo = TRUE)
   
 * Polynomial regression:
   $$
-  y = \beta_0 + \beta_1x + \beta_2 x^2 +\dots + \beta_mx^m + \epsilon
+  y = \beta_0 + \beta_1x + \beta_2 x^2 + \dots + \beta_mx^m + \epsilon
   $$
   * Precision issues, e.g. $x$ is blood pressure measure, and $x^3$ would be extremely large
   * Goodness of fit: deciding which order of polynomial term should be included
@@ -88,7 +90,7 @@ knitr::opts_chunk$set(echo = TRUE)
 * AKA semi-parametric regression, non-parametric regression, (generalized) additive model
 
 <!-- buzz word for grant writing. Little niche here, semi-parametric and non-parametric regression could be a little broader concept. -->
-* Can be used in linear regression, generalized linear regression, Cox regression
+* Can be easily incorporated in linear regression, generalized linear regression, Cox regression
 
 ## Spline Components
 * Order/degree of the polynomial function, $m$
