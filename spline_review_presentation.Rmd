@@ -23,28 +23,37 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # Who Am I?
 
- - Rising 4th-year Ph.D. student in BST @ UAB
- - Dissertation: Bayesian high-dimensional data analysis (Genomics)
+ - 4th-year Ph.D. student in BST @ UAB
+ 
+ - Dissertation: Bayesian high-dimensional additive model
+ 
  - Background:
  
     - B.S. in Computer Science & Stat @ UIUC    
+    
     - M.S. in Statistics (Analytic track) @ UIUC    
+    
     - Experienced R programmer (8-year)
+    
     - "Ridiculously awesome" commented by a REGARDS collaborator
 
-<!-- Enough comercial and self promotion, lets get to the topic-->
+<!-- Enough commercial and self promotion, lets get to the topic-->
 
 # Overview
 * Spline
+
   * Explanation
-  * Demonstration
-  * Implementation
+  * Demonstration & Implementation
+  * Inferences
+  
 * Advance Topics
+
   * Penalized spline
   * Multivariate spline
 
 # Objectives
-* To review basic concepts of splines
+* To review the basic concepts of spline
+
 * To raise you awareness of other advanced spline applications 
 
 <!-- primarily R user, Hence, less familiar of spline implementation in other softwares -->
@@ -61,27 +70,38 @@ knitr::opts_chunk$set(echo = TRUE)
 ## Previous Solutions:
 
 * Variable categorization: e.g. using quartiles of a continuous variable in a model
+
   * Assuming all subjects within a group shares the same risk/effect
   * Different magnitude of effects around thresholds
+  
+  
 * Polynomial regression:
   $$
-  y = \beta_0 + \beta_1x + \beta_2 x^2 +\dots + \beta_nx^n + \epsilon
+  y = \beta_0 + \beta_1x + \beta_2 x^2 +\dots + \beta_mx^m + \epsilon
   $$
   * Precision issues, e.g. $x$ is blood pressure measure, and $x^3$ would be extremely large
   * Goodness of fit: deciding which order of polynomial term should be included
 
 ## Spline
 * A spline is a piece-wise function where each piece is a polynomial function of order $m$
+
 * AKA semi-parametric regression, non-parametric regression, (generalized) additive model
 
 <!-- buzz word for grant writing. Little niche here, semi-parametric and non-parametric regression could be a little broader concept. -->
 * Can be used in linear regression, generalized linear regression, Cox regression
 
 ## Spline Components
-* Components:
-  * Number of knots, $k$, & their placements
-  * Order/degree of the polynomial function, $m$,: doesn't make much difference when reaching the cubic term and above
-  * Basis functions: different representations of the spline that have specific mathematical properties, e.g. b-splines basis, Gaussian radial basis, etc.
+* Order/degree of the polynomial function, $m$
+
+  * Normally, $m=3$ is sufficient
+
+* Number of knots, $k$, & their placements
+
+  * By default, equally spaced
+
+* Basis functions: 
+  * different representations of the spline that have specific mathematical properties
+  * e.g. b-splines basis, Gaussian radial basis, etc.
 
 ## Spline Example
 
@@ -92,7 +112,7 @@ A spline of order 0 with 2 knots
   \begin{cases}
   2, & x \leq 1 \\
   1.2, & 1 < x \leq 5\\
-  1.5, & x > 10
+  1.5, & x > 5
   \end{cases}
 \end{equation*}
   <!-- This is the business of column space force, aka linear algebra mathematicians. -->
@@ -104,15 +124,19 @@ A spline of order 0 with 2 knots
 Figure from @hastie2009elements PP.142
 
 ## Natural Cubic Spline
-* Great mathematical properties
-  * The smoothest possible interpolant
 * Cubic polynomial in each piece-wise function, i.e. m = 3
+
+* Great mathematical properties
+
+  * The smoothest possible interpolant
+  
 * Many different representations:
+
   * Restricted cubic spline
   * Cubic B-spline
   
 ## Natural Cubic Spline
-![](Figure/cubic_spline.jpg){height = 40%}
+![](Figure/cubic_spline.jpg){height=75%}
 
 Figure from @hastie2009elements PP.143
 
@@ -123,8 +147,7 @@ Given a response $Y$ and a variable $X$, implementing a cubic B-spline with 5 kn
 library(splines)  # Package for b-spline
 
 x_spline <- bs(x, degree = 3, # cubic polynomial
-               df = 8   # 5 (df-degree) knots         
-               )
+               df = 8)   # 5 (df-degree) knots         
 glm(y ~ x_spline) # Fitting the spline model
 
 # Equivalently
@@ -132,36 +155,49 @@ glm(y ~ bs(x, degree=3, df=8))
 ```
 
 ## Variability Band
+
 * A delicate statistical problem
+
 * Most commonly used: point-wise 95% confidence interval
+
 * Can be calculate using statistical contrasts
 
 ## Hypothesis Testing
+
 * Two hypothesis tests
+
   * If the non-linear terms are necessary
   * If the variable is necessary in the model
+
 * Be careful when reading program manual
 
 
 # Advanced Topics
 ## Penalized Spline
-* Motivation: to simplify the decision making about the knots
+* Motivation: 
+   * To simplify the decision making about the knots
+
 * Idea: 
-  * Set the number of knots to a really large value (k=25, 40)
+  * Set the number of knots to a really large value (k=25, 40, $N$)
   * Use variable selection methods, penalized models specifically, to decide the smoothness of the spline
+  
 * Complication & extension:
   * Complicated hypothesis testing and interval inference
   * Bayesian generalized additive model, generalized additive mixed model
 
 ## Multivariate Splines
 * Model the non-linear interaction between two variables
+
 * Thin-plate regression splines, tensor product splines
+
 * Application: 
-  * Loop, M. S., Howard, G., de Los Campos, G., Al-Hamdan, M. Z., Safford, M. M., Levitan, E. B., & McClure, L. A. (2017). Heat maps of hypertension, diabetes mellitus, and smoking in the continental United States. Circulation: Cardiovascular Quality and Outcomes, 10(1), e003350.
+  * Loop, M. S., Howard, G., de Los Campos, G., Al-Hamdan, M. Z., Safford, M. M., Levitan, E. B., & McClure, L. A. (2017). Heat maps of hypertension, diabetes mellitus, and smoking in the continental United States. __Circulation: Cardiovascular Quality and Outcomes, 10(1), e003350.__
 
 # Conclusion
 * Reviewed concepts of spline
+
 * New insight of advanced spline models
-* Consult with statisticians when feeling not comfortable doing spline models__
+
+* __Consult with statisticians when feeling not comfortable doing spline models__
 
 # Q & A
