@@ -1,10 +1,11 @@
 ---
-title: "All You Wanted To Know About Splines"
+title: "Three Levels of Spline Models: "
+subtitle: 'Understanding, Application and Beyond'
 author: "Boyi Guo"
 institute: |
   | Department of Biostatistics
   | University of Alabama at Birmingham
-date: "Feb 16, 2021"
+date: "April 8th, 2021"
 output: 
   beamer_presentation:
     theme: "Szeged"
@@ -12,6 +13,8 @@ output:
     toc: FALSE
     number_section: false
     slide_level: 2
+header-includes:
+  - \usepackage{bm}
 bibliography:
   - bibliography.bib
 nocite: '@*'
@@ -19,6 +22,9 @@ nocite: '@*'
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(ggpubr)
+library(viridis)
 ```
 
 # Who Am I?
@@ -40,21 +46,32 @@ knitr::opts_chunk$set(echo = TRUE)
 <!-- Enough commercial and self promotion, lets get to the topic-->
 
 # Overview
-* Spline
-
+* Understanding
   * Explanation & Demonstration
-  * Implementation
-  * Inferences
-  
-* Advance Topics
+  * Implementation in Linear Regression
+  * Implementation in Generalized Linear Models
+    
 
-  * Penalized spline
-  * Multivariate spline
+* Application
+  * Varying Coefficient Model
+  * Survival Models
+  * Smoothing Spline
+
+  
+* Beyond
+  * Mixed Model (Spatial & Temporal)
+  * Function Selection in High Dimension
+  * Others
+
 
 # Objectives
 * To review the basic concepts of spline
 
 * To raise you awareness of other advanced spline applications 
+
+* We don't focus on model fitting algorithm or software implementation
+
+* All the model can be implemented in R. Not sure about other softwares.
 
 <!-- primarily R user, Hence, less familiar of spline implementation in other softwares -->
 
@@ -67,7 +84,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 > --- @hastie2009elements PP. 139
 
-<!-- For example, the realtionship between age and COVID mortality. -->
+<!-- For example, the relationship between age and COVID mortality. -->
 
 ## Previous Solutions:
 
@@ -87,30 +104,31 @@ knitr::opts_chunk$set(echo = TRUE)
 ## Spline
 * A spline is a piece-wise function where each piece is a polynomial function of order $m$
 
-* AKA semi-parametric regression, non-parametric regression, (generalized) additive model
+* A.K.A. non-parametric regression, semi-parametric regression, (generalized) additive model
 
 <!-- buzz word for grant writing. Little niche here, semi-parametric and non-parametric regression could be a little broader concept. -->
-* Can be easily incorporated in linear regression, generalized linear regression, Cox regression
+* Can be easily incorporated in linear regression, generalized linear regression, Cox regression, as _regression spline_
 
 ## Spline Components
+
 * Order/degree of the polynomial function, $m$
 
   * Normally, $m=3$ is sufficient
 
-* Number of knots, $k$, & their placements
+* An increasing breakpoints sequence $\tau$
+  * A.K.A. knots
+  * $|\tau| = 5$, equally spaced
 
-  * By default, equally spaced
+*  the continuity conditions at knots, $v$
+  * Continuous at second derivative for natural cubic spline
 
-* Basis functions: 
-  * different representations of the spline that have specific mathematical properties
-  * e.g. b-splines basis, Gaussian radial basis, etc.
 
 ## Spline Example
 
 A spline of order 0 with 2 knots
 
 \begin{equation*}
-  \hat{y} = 
+  f(x) = 
   \begin{cases}
   2, & x \leq 1 \\
   1.2, & 1 < x \leq 5\\
@@ -125,25 +143,50 @@ A spline of order 0 with 2 knots
 
 Figure from @hastie2009elements PP.142
 
-## Natural Cubic Spline
+## Cubic Spline
 * Cubic polynomial in each piece-wise function, i.e. m = 3
 
-* Great mathematical properties
+  * E.g. truncated power bases with 3 knots at $\tau_1, \tau_2, \tau_3$
+\begin{align*}
+f(x) &= \beta_0 + \beta_1 x+\beta_2 x^2 + \beta_3 x^3 + \beta_4(x-\tau_1)^3_+\\
+& +  \beta_5(x-\tau_2)^3_+ + \beta_6(x-\tau_3)^3_+\\
+&= \bm \beta^T \bm B(x)
+\end{align*}
+
+
+* Continuous at second derivative
 
   * The smoothest possible interpolant
   
-* Many different representations:
-
-  * Restricted cubic spline
-  * Cubic B-spline
+* Alternative representation
+  * Natural cubic spline for linearity beyond boundary knots ($f^{'''}(x) = 0$)
+  * B-spline basis for stable computation
   
-## Natural Cubic Spline
+
+  
+## Cubic Spline
 ![](Figure/cubic_spline.jpg){height=75%}
 
 Figure from @hastie2009elements PP.143
 
 ## Implementation
-Given a response $Y$ and a variable $X$, implementing a cubic B-spline with 5 knots
+
+Given the matrix form of the spline function $f(x) = \bm \beta \bm B(x)$,
+
+* Linear regression: 
+$$y_i \sim N(\bm \beta \bm B(x_i) + \bm \beta^\prime \bm Z_i, \sigma^2)$$
+* Generalized linear regression: 
+$$E(y_i) = g^{-1}(\bm \beta \bm B(x_i) + \bm \beta^\prime \bm Z_i), Y_i \sim EF$$
+* Cox regression:
+$$h(t_i) = h_0(t_i) exp(\bm \beta \bm B(x_i) + \bm \beta^\prime \bm Z_i)$$
+
+* Model fitting and diagnositc remain the same
+
+## Software Implementation
+Two-step procedure
+
+* Create the 'design' matrix of the spline function $B(x)$
+* Fit the preferred model including $B(x)$ as covariates / predictors
 
 ```{r eval=FALSE}
 library(splines)  # Package for b-spline
@@ -168,32 +211,124 @@ glm(y ~ bs(x, degree=3, df=8))
 
 * Two hypothesis tests
 
-  * If the non-linear terms are necessary
+  * If the non-linear terms are necessary:
+  $$
+    H_0: \beta_2 = \beta_3 = \dots = 0
+  $$
   * If the variable is necessary in the model
+  $$
+    H_0: f(x) = 0
+  $$
 
 * Be careful when reading program manual
 
 
-# Advanced Topics
-## Penalized Spline
+
+
+# Application
+
+## Varying Coefficient Model
+* The effect of a variable $Z$ on the outcome $y$ are different at different values of some other variable $X$
+* Specifically, the slope of the effect are not constant across the domain of $X$
+
+```{r echo=F}
+
+dat <- data.frame(
+  X = rep(seq(1, 3, length.out=100), 2),
+  Z = c(rep(0,100),rep(1,100)) %>% factor
+) %>% 
+  mutate(
+    y_ln = 1+0.3*(as.numeric(Z)-1)  + 0.5*X*(as.numeric(Z)-1),
+    y_sp = 1+0.3*(as.numeric(Z)-1)  + 0.5*X*(as.numeric(Z)-1) + 0.3*sin(10*X)*(as.numeric(Z)-1)
+  )
+
+
+ggarrange(
+  ggplot(dat) +
+    geom_line(aes(x = X, y=y_ln, color = Z, group = Z), size = 1)+
+    ylim(0,3)+
+    theme_pubclean() +
+    scale_color_viridis(discrete=TRUE, option = "D"),
+  ggplot(dat) +
+    geom_line(aes(x = X, y=y_sp, color = Z, group = Z), size = 1)+
+    ylim(0,3)+
+    scale_color_viridis(discrete=TRUE, option = "D")+
+          theme_pubclean(),
+  common.legend = TRUE,
+  legend = "bottom"
+)
+
+```
+
+## Modelling Effect Modification
+
+$$
+E(y) = f(X) + f^\prime(X)Z = \beta_{Z=0} B(X) + \beta_{Z=1}B(X)*Z
+$$
+
+* $f(x)$ models the effect of $X$ when $Z=0$
+* $f^\prime(X)Z$ models the modifying effect of $Z$ at different values of $X$
+* $f^\prime(X)$ is the varying coefficient of $Z$, using a non-linear function, for non-constant slope.
+* Assumptions of consideration
+  * Should $f(x)$ be linear or non-linear?
+  * Should $f(x)$ use the same bases as $f^\prime(X)$?
+  * Should $f(x)$ be the same level of complexity as  $f^\prime(X)$?
+
+
+## Survival Models
+  * Defer to Sleeper and Harrington(1990) for non-linear hazard
+      * Knots are decided by equal number of failure in each group
+      * Transform the variable when extreme value exists
+      * Examine outlier effect on non-linear tests
+      
+## Non-proportional Hazards
+* Cox PH model assumes proportional hazards, i.e. the hazard/effect of a variable $Z$ is independent to time
+
+* Using Time-varying coefficients to model the non-proportional hazards
+
+$$
+  h(t) = h_0(t)exp(f(t)X) 
+$$
+* Defer to Gray (1992) and references therein
+    
+## Smoothing Spline
 * Motivation: 
    * To simplify the decision making about the knots
 
 * Idea: 
   * Set the number of knots to a really large value (k=25, 40, $N$)
   * Use variable selection methods, penalized models specifically, to decide the smoothness of the spline
+
   
-* Complication & extension:
-  * Complicated hypothesis testing and interval inference
-  * Bayesian generalized additive model, generalized additive mixed model
+## Statistical Complications
+  * Estimated degree of freedom due to shrinkage
+    * Harder to conduct hypothesis testing, and calculate CI
+    
+  * More decisions when modeling effect modification
+    * Same smoothness for the spline functions?
+    * If the same, how to estimate the smoothness
+  
+# Beyond
 
-## Multivariate Splines
-* Model the non-linear interaction between two variables
+## Spline Surface
 
-* Thin-plate regression splines, tensor product splines
+* Model the non-linear interaction between two continuous variables
+
+* Thin-plate splines, tensor product splines
+  * Thin-plate spline is scale-sensitive
+    * Recommended when variables are on the same scale
+  * Tensor product spline is scale-invariant
+
+* Dealing boundary effect
+  * Soap film smoothing
 
 * Application: 
   * Loop, M. S., Howard, G., de Los Campos, G., Al-Hamdan, M. Z., Safford, M. M., Levitan, E. B., & McClure, L. A. (2017). Heat maps of hypertension, diabetes mellitus, and smoking in the continental United States. __Circulation: Cardiovascular Quality and Outcomes, 10(1), e003350.__
+
+## Mixed Model
+
+## Function Selection
+
 
 # Conclusion
 * Reviewed concepts of spline
@@ -201,5 +336,6 @@ glm(y ~ bs(x, degree=3, df=8))
 * New insight of advanced spline models
 
 * __Consult with statisticians when feeling not comfortable doing spline models__
+
 
 # Q & A
