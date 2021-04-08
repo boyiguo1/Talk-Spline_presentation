@@ -77,7 +77,7 @@ Disclaimer
 * No discussion on model fitting algorithms or software implementations
 
 
-<!-- primarily R user, Hence, less familiar of spline implementation in other softwares -->
+<!-- primarily R user, Hence, less familiar of spline implementation in other software -->
 
 # Understanding
 
@@ -109,7 +109,7 @@ Disclaimer
 
 * A.k.a. non-parametric regression, semi-parametric regression, (generalized) additive model
 
-* Can be easily incorporated in linear regression, generalized linear regression, Cox regression, as _regression spline_
+* Can be easily incorporated in linear regression, generalized linear regression, Cox regression, as __regression splines__
 
 ## Spline Components
 
@@ -118,17 +118,17 @@ Disclaimer
   * Normally, $m=3$, i.e. cubic spline is sufficient
 
 * An increasing breakpoints sequence $\tau$
-  * a.k.a. knots
+  * a.k.a. knots, where the piece-wise functions joint
   * e.g. $k \equiv |\tau| = 5$, equally spaced
 
 * Continuity conditions at knots, $v$
   * to control the smoothness between pieces
-  * e.g. continuous at second derivative for natural cubic spline
+  * e.g. continuous at second derivative for cubic spline
 
 
 ## Toy Example
 
-A spline function of the variable $X$, $f(X)$, of order $m=0$ with $k=2$ knots and no continuity condition
+A spline function of the variable $X$, $f(X)$, of order $m=0$ with $k=2$ knots ($\tau_1 = 1, \tau_2 = 5$) and no continuity condition
 
 \begin{equation*}
   f(X) = 
@@ -142,8 +142,7 @@ A spline function of the variable $X$, $f(X)$, of order $m=0$ with $k=2$ knots a
 
 ## Visual Demonstration
 
-![](Figure/linear_spline.jpg)
-
+![](Figure/linear_spline.jpg){height=80%}
 Figure from @hastie2009elements PP.142
 
 ## Cubic Spline
@@ -176,22 +175,22 @@ Figure from @hastie2009elements PP.143
 
 ## Regression Splines
 
-Given the matrix form of the spline function $f(x) = \bm \beta^T \bm B(x)$,
+Given the matrix form of the spline function $f(X) = \bm \beta^T \bm B(X)$,
 
 * Linear regression: 
-$$y_i \sim N(\bm \beta \bm B(x_i) + \bm \beta^\prime \bm Z_i, \sigma^2)$$
+$$y_i \sim N(\bm \beta \bm B(X_i) + \bm \beta^\prime \bm Z_i, \sigma^2)$$
 * Generalized linear regression: 
-$$E(y_i) = g^{-1}(\bm \beta \bm B(x_i) + \bm \beta^\prime \bm Z_i), Y_i \sim EF$$
+$$E(y_i) = g^{-1}(\bm \beta \bm B(X_i) + \bm \beta^\prime \bm Z_i), Y_i \sim EF$$
 * Cox regression:
-$$h(t_i) = h_0(t_i) exp(\bm \beta \bm B(x_i) + \bm \beta^\prime \bm Z_i)$$
+$$h(t_i) = h_0(t_i) exp(\bm \beta \bm B(X_i) + \bm \beta^\prime \bm Z_i)$$
 
 Model fitting and diagnostic remain the same
 
 ## Software Implementation
 Two-step procedure
 
-* Create the 'design' matrix of the spline function $B(x)$
-* Fit the preferred model including $B(x)$ as covariates / predictors
+* Create the 'design' matrix of the spline function $B(X)$
+* Fit the preferred model including $B(X)$ as covariates / predictors
 
 ```{r eval=FALSE}
 library(splines)  # Package for b-spline
@@ -211,7 +210,7 @@ glm(y ~ bs(x, degree=3, df=8))
 
 * Most commonly used: 95% point-wise confidence interval
 
-* Can be calculate using statistical contrasts
+* Can be calculate using statistical contrasts for regression splines
 
 ## Hypothesis Testing
 
@@ -291,21 +290,20 @@ ggarrange(
 ```
 
 ## Non-linear Effect Modification
-
 $$
 E(y) = f(X) + f^\prime(X)Z = \beta_{Z=0}^T B(X) + \beta_{Z=1}^TB(X)*Z
 $$
 
-* $f(x)$ models the effect of $X$ when $Z=0$
+* $f(X)$ models the effect of $X$ when $Z=0$
 * $f^\prime(X)Z$ models the modifying effect of $Z$ at different values of $X$
 * $f^\prime(X)$ is the varying coefficient of $Z$, using a non-linear function, for non-constant slope.
 
 
 ## Non-linear Effect Modification
 * Assumptions of consideration
-  * Should $f(x)$ be linear or non-linear?
-  * Should $f(x)$ use the same bases as $f^\prime(X)$?
-  * Should $f(x)$ be the same level of complexity as  $f^\prime(X)$?
+  * Should $f(X)$ be linear or non-linear?
+  * Should $f(X)$ use the same bases as $f^\prime(X)$?
+  * Should $f(X)$ be the same level of complexity as  $f^\prime(X)$?
       
 ## Non-proportional Hazard
 * Cox PH model assumes proportional hazards, i.e. the hazard/effect of a variable $Z$ is independent to time
@@ -324,15 +322,6 @@ To model the non-linear fixed effect while considering random effects
 * Easy to implement: to include your design matrix of $f(X)$ in the fixed effect
 * `gamm` in  R-package `mgcv`
 
-
-  
-## Statistical Complications
-  * Estimated degree of freedom due to shrinkage
-    * Harder to conduct hypothesis testing, and calculate CI
-    
-  * More decisions when modeling effect modification
-    * Same smoothness for the spline functions?
-    * If the same, how to estimate the smoothness
   
 # Beyond
 
@@ -345,7 +334,7 @@ To model the non-linear fixed effect while considering random effects
     * Recommended when variables are on the same scale
   * Tensor product spline is scale-invariant
 
-* Dealing boundary effect
+* Dealing with _overly smoothing across boundary_
   * Soap film smoothing
 
 * Application: 
@@ -376,6 +365,13 @@ $$
 
 * $\lambda$ is a tuning predictor, selected via (generalized) cross-validation
 
+## Statistical Complications
+* Estimated degree of freedom due to shrinkage
+  * Harder to conduct hypothesis testing, and calculate CI
+  
+* More decisions when modeling effect modification
+  * Same smoothness for the spline functions?
+  * If the same, how to estimate the smoothness
 
 ## Function Selection
 * Question of interest
@@ -400,12 +396,30 @@ $$
 
 * Same set of variables can lead to many models with different assumptions
   * Fit many models and compare
-  * Finding inconsistency
+  * Explore the inconsistency
   
 * Balance between interpolation and prediction
   * "Black box" models for improved prediction
 
-* __Consult with statisticians when feeling not comfortable doing spline models__
+* __Consult with statisticians when not comfortable dealing spline models__
 
+## Great Book
+::: columns
+
+:::: column
+Wood, S. N. (2017). Generalized additive models: an introduction with R. CRC press.
+
+* Chapter 7 for examples
+::::
+
+:::: column
+
+![](Figure/simon_book.jpg){height=70%}
+
+::::
+
+:::
 
 # Q & A
+
+# Reference
