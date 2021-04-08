@@ -178,11 +178,11 @@ Figure from @hastie2009elements PP.143
 Given the matrix form of the spline function $f(X) = \bm \beta^T \bm B(X)$,
 
 * Linear regression: 
-$$y_i \sim N(\bm \beta \bm B(X_i) + \bm \beta^\prime \bm Z_i, \sigma^2)$$
+$$y_i \sim N(\bm \beta^T \bm B(X_i) + \bm \beta_{cov}^T \bm Z_i, \sigma^2)$$
 * Generalized linear regression: 
-$$E(y_i) = g^{-1}(\bm \beta \bm B(X_i) + \bm \beta^\prime \bm Z_i), Y_i \sim EF$$
+$$E(y_i) = g^{-1}(\bm \beta^T \bm B(X_i) + \bm \beta_{cov}^T \bm Z_i), Y_i \sim EF$$
 * Cox regression:
-$$h(t_i) = h_0(t_i) exp(\bm \beta \bm B(X_i) + \bm \beta^\prime \bm Z_i)$$
+$$h(t_i) = h_0(t_i) exp(\bm \beta^T \bm B(X_i) + \bm \beta_{cov}^T \bm Z_i)$$
 
 Model fitting and diagnostic remain the same
 
@@ -239,7 +239,7 @@ glm(y ~ bs(x, degree=3, df=8))
   
 * Survival Model
   * Knots are decided by equal number of events in each group
-  * Defer to Sleeper and Harrington(1990) for practical guidance
+  * Defer to @Sleeper1990 for practical guidance
   
   <!-- Insert jokes about rule of thumb -->
 
@@ -313,7 +313,7 @@ $$
   h(t) = h_0(t)exp(f(t)X) 
 $$
 
-* Defer to Gray (1992) and references therein
+* Defer to @Gray1992 and references therein
 
 ## Mixed Model
 To model the non-linear fixed effect while considering random effects
