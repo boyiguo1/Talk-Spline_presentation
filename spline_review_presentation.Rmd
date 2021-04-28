@@ -306,7 +306,7 @@ $$
   * Should $f(X)$ be the same level of complexity as  $f^\prime(X)$?
       
 ## Non-proportional Hazard
-* Cox PH model assumes proportional hazards, i.e. the hazard/effect of a variable $Z$ is independent to time
+* Cox PH model assumes proportional hazards, i.e. the hazard/effect of a variable $X$ is independent to time
 
 * Using Time-varying coefficients to model the non-proportional hazards
 $$
@@ -319,7 +319,7 @@ $$
 To model the non-linear fixed effect while considering random effects
 
 * Good for longitudinal studies or multi-center studies
-* Easy to implement: to include your design matrix of $f(X)$ in the fixed effect
+* Easy to implement: to include your design matrix of $\bm B(X)$ in the fixed effect
 * `gamm` in  R-package `mgcv`
 
   
@@ -334,7 +334,7 @@ To model the non-linear fixed effect while considering random effects
     * Recommended when variables are on the same scale
   * Tensor product spline is scale-invariant
 
-* Dealing with _overly smoothing across boundary_
+* Dealing with _over smoothing across boundary_
   * Soap film smoothing
 
 * Application: 
@@ -363,7 +363,7 @@ $$
 \text{arg}\min\limits_{\bm \beta} \sum\limits^n_{i=1} \{y_i - \beta^T B(X_i)\}^2 + \lambda \int f^{''}(X)^2dx
 $$
 
-* $\lambda$ is a tuning predictor, selected via (generalized) cross-validation
+* $\lambda$ is a tuning parameter, selected via (generalized) cross-validation
 
 ## Statistical Complications
 * Estimated degree of freedom due to shrinkage
@@ -375,7 +375,7 @@ $$
 
 ## Function Selection
 * Question of interest
-  * If a variable $X_i$ has effect on the outcome $Y$
+  * If a variable $X$ has effect on the outcome $Y$
   * High-dimensional data analysis, e.g. EHR, Genomics
 
 * Solutions
@@ -385,7 +385,7 @@ $$
   * Group penalized models
     * Biased estimation
     * Global penalization vs local penalization
-  * Bayesian Hierarchical models
+  * Bayesian hierarchical models
     * Robust estimation
     * Slow...
 
